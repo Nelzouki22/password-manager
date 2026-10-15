@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <h1 class="h3 mb-0">Dashboard</h1>
+  <a class="btn btn-primary" href="{{ url_for('credential_new') }}"><i class="bi bi-plus-lg me-1"></i>Add password</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card h-100"><div class="card-body">
+      <div class="text-body-secondary small">Saved accounts</div>
+      <div class="display-6">{{ report.total }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100 {{ 'border-danger' if report.weak }}"><div class="card-body">
+      <div class="text-body-secondary small">Weak passwords</div>
+      <div class="display-6 {{ 'text-danger' if report.weak }}">{{ report.weak|length }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100 {{ 'border-warning' if report.duplicate_count }}"><div class="card-body">
+      <div class="text-body-secondary small">Reused passwords</div>
+      <div class="display-6 {{ 'text-warning' if report.duplicate_count }}">{{ report.duplicate_count }}</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100"><div class="card-body">
+      <div class="text-body-secondary small">Older than {{ report.old_after_days }} days</div>
+      <div class="display-6">{{ report.old|length }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h2 class="h5 mb-0">Security score</h2>
+      <a href="{{ url_for('audit_page') }}" class="small">View full audit</a>
+    </div>
+    {% if report.score is none %}
+      <p class="text-body-secondary mb-0">Add your first password to see your score.</p>
+    {% else %}
+      <div class="d-flex align-items-center gap-3">
+        <progress class="meter flex-grow-1" value="{{ report.score }}" max="100"></progress>
+        <strong>{{ report.score }}/100</strong>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header bg-transparent fw-semibold">Recently added</div>
+  {% if recent %}
+  <ul class="list-group list-group-flush">
+    {% for e in recent %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-semibold">{{ e.account_name }}</div>
+        <div class="small text-body-secondary">{{ e.username }} &middot; {{ e.created_at|datefmt }}</div>
+      </div>
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('credential_edit', credential_id=e.id) }}">Edit</a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="card-body text-body-secondary">Nothing here yet. <a href="{{ url_for('credential_new') }}">Add your first password</a>.</div>
+  {% endif %}
+</div>
+{% endblock %}

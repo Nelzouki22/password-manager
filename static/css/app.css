@@ -1,0 +1,24 @@
+/* Small additions on top of Bootstrap 5.3 (theme colours come from Bootstrap's data-bs-theme). */
+body { background-color: var(--bs-body-bg); }
+
+.card { border-radius: 0.75rem; }
+
+/* <progress> used instead of inline-styled bars so the CSP can forbid inline styles. */
+progress.meter {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background-color: var(--bs-secondary-bg);
+}
+progress.meter::-webkit-progress-bar { background-color: var(--bs-secondary-bg); }
+progress.meter::-webkit-progress-value { background-color: var(--bs-primary); border-radius: 999px; }
+progress.meter::-moz-progress-bar { background-color: var(--bs-primary); border-radius: 999px; }
+
+.font-monospace { letter-spacing: 0.02em; word-break: break-all; }
+
+@media (max-width: 575.98px) {
+  .display-6 { font-size: 1.75rem; }
+}

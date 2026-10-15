@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block title %}Vault{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">Saved accounts <span class="badge text-bg-secondary fs-6">{{ total }}</span></h1>
+  <a class="btn btn-primary" href="{{ url_for('credential_new') }}"><i class="bi bi-plus-lg me-1"></i>Add password</a>
+</div>
+
+<form method="get" action="{{ url_for('vault') }}" class="row g-2 mb-3" role="search">
+  <div class="col-12 col-md">
+    <input class="form-control" type="search" name="q" value="{{ query }}" maxlength="100" placeholder="Search saved accounts" aria-label="Search">
+  </div>
+  <div class="col-8 col-md-3">
+    <select class="form-select" name="field" aria-label="Search in">
+      {% for value, label in [('all','Everything'),('website','Website'),('username','Username'),('account','Account name')] %}
+      <option value="{{ value }}" {{ 'selected' if field == value }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-4 col-md-auto d-flex gap-2">
+    <button class="btn btn-outline-primary flex-grow-1" type="submit"><i class="bi bi-search"></i> Search</button>
+    {% if query %}<a class="btn btn-outline-secondary" href="{{ url_for('vault') }}" aria-label="Clear search"><i class="bi bi-x-lg"></i></a>{% endif %}
+  </div>
+</form>
+
+{% if rows %}
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr><th>Account</th><th>Username</th><th>Password</th><th>Strength</th><th>Added</th><th class="text-end">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ r.account_name }}</div>
+            {% if r.website_url %}<a class="small" href="{{ r.website_url }}" target="_blank" rel="noopener noreferrer nofollow">{{ r.website_url|replace('https://','')|replace('http://','')|truncate(40) }}</a>{% endif %}
+          </td>
+          <td>{{ r.username }}</td>
+          <td class="text-nowrap">
+            <span class="font-monospace" id="pw-{{ r.id }}">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+          </td>
+          <td>{{ m.strength_badge(r.strength) }}</td>
+          <td class="text-nowrap">{{ r.created_at|datefmt }}</td>
+          <td class="text-end text-nowrap">
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="reveal" data-id="{{ r.id }}" title="Show / hide password" aria-label="Show or hide password"><i class="bi bi-eye"></i></button>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-action="copy" data-id="{{ r.id }}" title="Copy password (clipboard clears after 30s)" aria-label="Copy password"><i class="bi bi-clipboard"></i></button>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('credential_edit', credential_id=r.id) }}" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
+            <form class="d-inline" method="post" action="{{ url_for('credential_delete', credential_id=r.id) }}" data-confirm="Delete {{ r.account_name }}? This cannot be undone.">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-outline-danger" type="submit" title="Delete" aria-label="Delete"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% elif query %}
+<div class="text-center text-body-secondary py-5">No accounts match &ldquo;{{ query }}&rdquo;.</div>
+{% else %}
+<div class="text-center text-body-secondary py-5">Your vault is empty. <a href="{{ url_for('credential_new') }}">Add your first password</a>.</div>
+{% endif %}
+{% endblock %}

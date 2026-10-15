@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Security audit{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Security audit</h1>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="h5">Vault health</h2>
+    {% if report.score is none %}
+      <p class="text-body-secondary mb-0">No saved passwords to audit yet.</p>
+    {% else %}
+      <div class="d-flex align-items-center gap-3">
+        <progress class="meter flex-grow-1" value="{{ report.score }}" max="100"></progress>
+        <strong>{{ report.score }}/100</strong>
+      </div>
+      <p class="small text-body-secondary mt-2 mb-0">Based on {{ report.total }} saved password{{ '' if report.total == 1 else 's' }}. Weak, reused and old passwords lower the score.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header bg-transparent fw-semibold"><i class="bi bi-exclamation-triangle text-danger me-1"></i>Weak passwords ({{ report.weak|length }})</div>
+      <ul class="list-group list-group-flush">
+        {% for w in report.weak %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">{{ w.account_name }}
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('credential_edit', credential_id=w.id) }}">Fix</a></li>
+        {% else %}<li class="list-group-item text-body-secondary">None &mdash; nice work.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header bg-transparent fw-semibold"><i class="bi bi-files text-warning me-1"></i>Reused passwords ({{ report.duplicates|length }} group{{ '' if report.duplicates|length == 1 else 's' }})</div>
+      <ul class="list-group list-group-flush">
+        {% for group in report.duplicates %}
+        <li class="list-group-item">
+          <div class="small text-body-secondary mb-1">Same password on {{ group|length }} accounts</div>
+          {% for e in group %}<a class="badge text-bg-warning text-decoration-none me-1" href="{{ url_for('credential_edit', credential_id=e.id) }}">{{ e.account_name }}</a>{% endfor %}
+        </li>
+        {% else %}<li class="list-group-item text-body-secondary">No reused passwords.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header bg-transparent fw-semibold"><i class="bi bi-clock-history me-1"></i>Not changed in {{ report.old_after_days }}+ days ({{ report.old|length }})</div>
+      <ul class="list-group list-group-flush">
+        {% for o in report.old %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <span>{{ o.account_name }} <span class="small text-body-secondary">{{ o.updated_at|datefmt }}</span></span>
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('credential_edit', credential_id=o.id) }}">Update</a></li>
+        {% else %}<li class="list-group-item text-body-secondary">Everything is recent.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header bg-transparent fw-semibold"><i class="bi bi-journal-text me-1"></i>Activity log (latest 100)</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>When (UTC)</th><th>Event</th><th>Detail</th><th>IP address</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="text-nowrap">{{ log.created_at|datefmt('%Y-%m-%d %H:%M:%S') }}</td>
+          <td><code>{{ log.event }}</code></td>
+          <td>{{ log.detail or '' }}</td>
+          <td>{{ log.ip_address or '' }}</td>
+        </tr>
+        {% else %}<tr><td colspan="4" class="text-body-secondary">No activity recorded.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

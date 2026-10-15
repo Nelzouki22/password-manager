@@ -1,0 +1,10 @@
+.env
+.git
+.venv
+instance
+logs
+*.db
+*.pwmbackup
+__pycache__
+tests
+screenshots

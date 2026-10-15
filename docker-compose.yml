@@ -1,0 +1,19 @@
+services:
+  web:
+    build: .
+    env_file: .env                      # SECRET_KEY and ENCRYPTION_PEPPER live here, not in the image
+    ports:
+      - "127.0.0.1:8000:8000"           # localhost only; put an HTTPS reverse proxy in front for remote use
+    volumes:
+      - vault-data:/data                # SQLite database + audit logs
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  vault-data:

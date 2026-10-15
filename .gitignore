@@ -1,0 +1,12 @@
+.env
+instance/
+logs/
+*.db
+*.db-journal
+*.pwmbackup
+__pycache__/
+*.pyc
+.venv/
+venv/
+.idea/
+.vscode/

@@ -1,0 +1,4 @@
+{% macro strength_badge(s) -%}
+  {%- set colors = ['danger', 'warning', 'info', 'success', 'success'] -%}
+  <span class="badge text-bg-{{ colors[s.score] }}" title="~{{ s.entropy_bits }} bits of entropy">{{ s.label }}</span>
+{%- endmacro %}

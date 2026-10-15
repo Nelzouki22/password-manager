@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Backup{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Encrypted backup</h1>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-transparent fw-semibold"><i class="bi bi-box-arrow-down me-1"></i>Export</div>
+      <div class="card-body">
+        <p class="text-body-secondary small">Downloads every saved account in a file encrypted with a passphrase you choose. Keep the passphrase safe &mdash; without it the file cannot be opened.</p>
+        <form method="post" action="{{ url_for('backup_export') }}" autocomplete="off">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-3">
+            <label class="form-label" for="master_password">Master password <span class="text-body-secondary">(confirms it is you)</span></label>
+            <input class="form-control" id="master_password" name="master_password" type="password" maxlength="1024" required autocomplete="current-password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="passphrase">Backup passphrase</label>
+            <input class="form-control" id="passphrase" name="passphrase" type="password" minlength="{{ min_passphrase }}" maxlength="1024" required autocomplete="new-password">
+            <div class="form-text">At least {{ min_passphrase }} characters. Use something different from your master password.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="confirm_passphrase">Confirm passphrase</label>
+            <input class="form-control" id="confirm_passphrase" name="confirm_passphrase" type="password" maxlength="1024" required autocomplete="new-password">
+          </div>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-download me-1"></i>Download encrypted backup</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-transparent fw-semibold"><i class="bi bi-box-arrow-in-up me-1"></i>Import</div>
+      <div class="card-body">
+        <p class="text-body-secondary small">Restore from a <code>.pwmbackup</code> file. Entries are added to your vault (existing entries are not changed or removed).</p>
+        <form method="post" action="{{ url_for('backup_import') }}" enctype="multipart/form-data" autocomplete="off">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="mb-3">
+            <label class="form-label" for="backup_file">Backup file</label>
+            <input class="form-control" id="backup_file" name="backup_file" type="file" accept=".pwmbackup,application/octet-stream" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="import_passphrase">Backup passphrase</label>
+            <input class="form-control" id="import_passphrase" name="passphrase" type="password" maxlength="1024" required autocomplete="off">
+          </div>
+          <button class="btn btn-outline-primary" type="submit"><i class="bi bi-upload me-1"></i>Import backup</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
